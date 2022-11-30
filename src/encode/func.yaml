@@ -1,0 +1,25 @@
+specVersion: 0.34.0
+name: encode
+runtime: python
+registry: docker.io/ntnxtme
+image: docker.io/ntnxtme/encode:base
+imageDigest: ""
+created: 2022-11-24T12:51:27.140388802Z
+invocation:
+  format: cloudevent
+build:
+  buildpacks: []
+  builder: pack
+  buildEnvs: []
+run:
+  volumes: []
+  envs:
+    - value: "{{ secret:nutanix-objects }}"
+deploy:
+  namespace: ""
+  annotations: {}
+  options: {}
+  labels: []
+  healthEndpoints:
+    liveness: /health/liveness
+    readiness: /health/readiness

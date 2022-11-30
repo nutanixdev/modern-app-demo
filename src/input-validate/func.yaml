@@ -1,0 +1,25 @@
+specVersion: 0.34.0
+name: input-validate
+runtime: python
+registry: docker.io/ntnxtme
+image: docker.io/ntnxtme/input-validate:base
+imageDigest: ""
+created: 2022-11-28T20:49:43.706813171Z
+invocation:
+  format: cloudevent
+build:
+  buildpacks: []
+  builder: pack
+  buildEnvs: []
+run:
+  volumes: []
+  envs:
+    - value: "{{ secret:nutanix-objects }}"
+deploy:
+  namespace: ""
+  annotations: {}
+  options: {}
+  labels: []
+  healthEndpoints:
+    liveness: /health/liveness
+    readiness: /health/readiness

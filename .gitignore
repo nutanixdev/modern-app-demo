@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Knative
+**/.func
+
+# macOS
+.DS_Store
