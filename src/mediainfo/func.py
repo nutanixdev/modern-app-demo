@@ -9,7 +9,7 @@ from cloudevents.conversion import to_json
 from parliament import Context
 
 SSL_VERIFY = os.environ.get("SSL_VERIFY", False)
-FUNC_NAME = os.environ['K_SERVICE']
+FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -122,7 +122,8 @@ def s3_client():
 
 
 def get_signed_url(bucket, obj):
-    SIGNED_URL_EXPIRATION = os.environ.get('SIGNED_URL_EXPIRATION', 3600) # The number of seconds the presigned url is valid for. By default it expires in an hour (3600 seconds)
+    # The number of seconds the presigned url is valid for. By default it expires in an hour (3600 seconds)
+    SIGNED_URL_EXPIRATION = os.environ.get('SIGNED_URL_EXPIRATION', 3600)
 
     return s3_client().generate_presigned_url(
         'get_object',
