@@ -4,7 +4,7 @@ FROM quay.io/fedora/python-311
 
 USER 0
 
-ADD . /tmp/src
+COPY . /tmp/src
 RUN /usr/bin/fix-permissions /tmp/src
 USER 1001
 
@@ -12,4 +12,4 @@ USER 1001
 RUN /usr/libexec/s2i/assemble
 
 # Set the default command for the resulting image
-CMD /usr/libexec/s2i/run
+CMD python -m parliament .
