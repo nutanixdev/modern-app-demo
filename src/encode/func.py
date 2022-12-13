@@ -3,14 +3,13 @@ import logging
 import os
 import shutil
 import subprocess
+from pathlib import Path
 
 import boto3
-from botocore.config import Config
 from botocore.exceptions import ClientError
 from cloudevents.conversion import to_json
 from parliament import Context
 
-SSL_VERIFY = os.environ.get("SSL_VERIFY", False)
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
@@ -37,34 +36,27 @@ RENDITIONS = [
         'maxrate': '5671k', 'bufsize': '7950k'},
 ]
 
-FFMPEG_PATH = "/usr/local/bin"
-FFMPEG_BIN = "ffmpeg"
-FFMPEG_EXEC = os.path.join(FFMPEG_PATH, FFMPEG_BIN)
+# FFMPEG_PATH = "/usr/local/bin"
+# FFMPEG_BIN = "ffmpeg"
+# FFMPEG_EXEC = os.path.join(FFMPEG_PATH, FFMPEG_BIN)
 
 S3_DESTINATION_BUCKET = os.environ.get("S3_DESTINATION_BUCKET", None)
 
 
 def s3_client():
+    SSL_VERIFY = os.environ.get('SSL_VERIFY', False)
     AWS_REGION = os.environ['AWS_REGION']
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_S3_ENDPOINT_URL = os.environ['AWS_S3_ENDPOINT_URL']
-
-    boto_config = Config(
-        region_name=AWS_REGION,
-        s3={
-            # 'addressing_style': 'virtual',
-            'signature_version': 's3v4'
-        }
-    )
 
     session = boto3.Session()
     return session.client('s3',
                           endpoint_url=AWS_S3_ENDPOINT_URL,
                           aws_access_key_id=AWS_ACCESS_KEY_ID,
                           aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-                          verify=SSL_VERIFY,
-                          config=boto_config)
+                          region_name=AWS_REGION,
+                          verify=SSL_VERIFY)
 
 
 def get_signed_url(bucket, obj):
@@ -111,13 +103,15 @@ def main(context: Context):
         srcVideo = data['srcVideo']
         guid = data['guid']
 
-        os.makedirs(f'output/{guid}')
+        Path(f'output/{guid}').mkdir(parents=True, exist_ok=True)
+
+        # os.makedirs(f'output/{guid}')
 
         signed_url = get_signed_url(
             srcBucket, srcVideo)
         logger.info(f'SIGNED URL:: {signed_url}', extra=source_attributes)
 
-        command = [FFMPEG_EXEC, '-i', signed_url,
+        command = ['ffmpeg', '-i', signed_url,
                    '-ar', '48000', '-c:a', 'aac', '-c:v', 'h264', '-crf', '20',
                    '-g', '48', '-hls_playlist_type', 'vod',
                    '-hls_segment_filename', f'output/{guid}/%v_%03d.ts', '-hls_time', '4',
