@@ -53,7 +53,7 @@ def main(context: Context):
         if srcBucket is not os.environ['S3_SOURCE_BUCKET']:
             logger.info(
                 f'IGNORING:: Request for bucket {srcBucket}', extra=source_attributes)
-            return None
+            return {}
 
         srcFile = context.cloud_event.data['Records'][0]['s3']['object']['key']
 
