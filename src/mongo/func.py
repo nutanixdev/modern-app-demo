@@ -44,9 +44,9 @@ def main(context: Context):
 
         collection = dbname['videos']
 
-        filter = {"_id": data['data']['guid']}
+        filter = {"_id": data['guid']}
 
-        newvalues = {"$set": data['data']}
+        newvalues = {"$set": data}
 
         collection.update_one(
             filter, newvalues, upsert=True
