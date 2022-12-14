@@ -103,6 +103,10 @@ def main(context: Context):
         srcVideo = data['srcVideo']
         guid = data['guid']
 
+        # To add output from encoding
+        data['detail'] = {}
+        data['detail']['outputGroupDetails'] = []
+
         Path(f'output/{guid}').mkdir(parents=True, exist_ok=True)
 
         # os.makedirs(f'output/{guid}')
@@ -154,6 +158,8 @@ def main(context: Context):
 
         subprocess.check_output(command)
 
+        playlistFilePaths = []
+
         for root, dirs, files in os.walk(f'output/{guid}'):
             for filename in files:
 
@@ -168,6 +174,15 @@ def main(context: Context):
                     f'Searching {s3_path} in {S3_DESTINATION_BUCKET}', extra=source_attributes)
 
                 upload_file(local_path, S3_DESTINATION_BUCKET, s3_path)
+
+                playlistFilePaths.append(s3_path)
+
+        data['detail']['outputGroupDetails'].append(
+            {
+                'type': 'HLS_GROUP',
+                'playlistFilePaths': playlistFilePaths
+            }
+        )
 
         shutil.rmtree(f'output/{guid}')
 
