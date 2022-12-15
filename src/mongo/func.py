@@ -55,10 +55,10 @@ def main(context: Context):
             filter, newvalues, upsert=True
         )
 
-        imported_video = collection.find_one(filter)
+        video = collection.find_one(filter)
 
         logger.info(
-            f'UPDATE:: {imported_video}', extra=source_attributes)
+            f'UPDATE:: {video}', extra=source_attributes)
 
         attributes = {
             "type": f'com.nutanix.gts.{FUNC_NAME}',
