@@ -102,6 +102,7 @@ def main(context: Context):
         srcBucket = data['srcBucket']
         srcVideo = data['srcVideo']
         guid = data['guid']
+        encodingProfile = data['encodingProfile']
 
         # To add output from encoding
         data['detail'] = {}
@@ -127,12 +128,16 @@ def main(context: Context):
         params_stream_maps_args = []
 
         for i, v in enumerate(RENDITIONS):
-            params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0'])
-            params_stream_maps_args.append(f'v:{i},a:{i},name:{v["name"]}')
-
             w = v['resolution'].split(
                 'x')[0]
             h = v['resolution'].split('x')[1]
+
+            if int(h) > encodingProfile:
+                break
+
+            params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0'])
+            params_stream_maps_args.append(f'v:{i},a:{i},name:{v["name"]}')
+
             scale_filter = [
                 f'-filter:v:{i}',
                 f'scale=w={w}:h={h}:force_original_aspect_ratio=decrease',
