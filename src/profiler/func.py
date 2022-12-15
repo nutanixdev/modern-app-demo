@@ -24,6 +24,21 @@ logger = logging.getLogger('boto3')
 logger.setLevel(logging.INFO)
 
 
+def profile_check(profiles, videoHeight):
+    lastProfile = profiles[0]
+    encodeProfile = abs(videoHeight - profiles[0])
+
+    for item in profiles:
+        profile = abs(videoHeight - item)
+        if profile > lastProfile:
+            return encodeProfile
+
+        encodeProfile = item
+        lastProfile = profile
+
+    return encodeProfile
+
+
 def main(context: Context):
     source_attributes = context.cloud_event.get_attributes()
 
@@ -40,25 +55,28 @@ def main(context: Context):
 
     try:
         data = context.cloud_event.data
-        guid = data['guid']
-        data.pop('_id', None)
-
         dbname = client[MONGODB_DATABASE]
 
         collection = dbname['videos']
 
-        filter = {"_id": guid}
+        filter = {"_id": data['guid']}
 
-        newvalues = {"$set": data}
+        video = collection.find_one(filter)
 
-        collection.update_one(
-            filter, newvalues, upsert=True
-        )
+        for k, v in video.items():
+            data[k] = v
 
-        imported_video = collection.find_one(filter)
+        mediaInfo = data['srcMediainfo']
+        data['srcHeight'] = mediaInfo['video'][0]['height']
+        data['srcWidth'] = mediaInfo['video'][0]['width']
 
-        logger.info(
-            f'UPDATE:: {imported_video}', extra=source_attributes)
+        profiles = [2160, 1080, 720]
+
+        data['encodingProfile'] = profile_check(
+            profiles=profiles, videoHeight=data['srcHeight'])
+
+        logger.info(f'RESPONSE:: {json.dumps(data)}',
+                    extra=source_attributes)
 
         attributes = {
             "type": f'com.nutanix.gts.{FUNC_NAME}',
