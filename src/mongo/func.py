@@ -8,14 +8,6 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
-MONGODB_USERNAME = os.environ['MONGODB_USERNAME']
-MONGODB_PASSWORD = os.environ['MONGODB_PASSWORD']
-MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'mongodb')
-MONGODB_ADDRESS = os.environ['MONGODB_ADDRESS']
-MONGODB_PORT = os.environ.get('MONGODB_PORT', 27017)
-
-DB_URI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_ADDRESS}:{MONGODB_PORT}/{MONGODB_DATABASE}?authSource=admin&directConnection=true'
-
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -24,11 +16,14 @@ logger = logging.getLogger('boto3')
 logger.setLevel(logging.INFO)
 
 
-def main(context: Context):
-    source_attributes = context.cloud_event.get_attributes()
+def mongo_client():
+    MONGODB_USERNAME = os.environ['MONGODB_USERNAME']
+    MONGODB_PASSWORD = os.environ['MONGODB_PASSWORD']
+    MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'mongodb')
+    MONGODB_ADDRESS = os.environ['MONGODB_ADDRESS']
+    MONGODB_PORT = os.environ.get('MONGODB_PORT', 27017)
 
-    logger.info(
-        f'REQUEST:: {to_json(context.cloud_event)}', extra=source_attributes)
+    DB_URI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_ADDRESS}:{MONGODB_PORT}/{MONGODB_DATABASE}?authSource=admin&directConnection=true'
 
     client = MongoClient(DB_URI, serverSelectionTimeoutMS=1)
     try:
@@ -38,12 +33,21 @@ def main(context: Context):
         print("Server not available")
         raise ConnectionFailure
 
+    return client[MONGODB_DATABASE]
+
+
+def main(context: Context):
+    source_attributes = context.cloud_event.get_attributes()
+
+    logger.info(
+        f'REQUEST:: {to_json(context.cloud_event)}', extra=source_attributes)
+
     try:
         data = context.cloud_event.data
         guid = data['guid']
         data.pop('_id', None)
 
-        dbname = client[MONGODB_DATABASE]
+        dbname = mongo_client()
 
         collection = dbname['videos']
 
