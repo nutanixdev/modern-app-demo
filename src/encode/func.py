@@ -182,14 +182,19 @@ def main(context: Context):
 
                 playlistFilePaths.append(s3_path)
 
+        playlistFilePaths.sort(reverse=True)
+
         data['detail']['outputGroupDetails'].append(
             {
                 'type': 'HLS_GROUP',
-                'playlistFilePaths': playlistFilePaths.sort(reverse=True)
+                'playlistFilePaths': playlistFilePaths
             }
         )
 
         shutil.rmtree(f'output/{guid}')
+
+        logger.info(f'RESPONSE:: {json.dumps(data)}',
+                    extra=source_attributes)
 
         attributes = {
             "type": f'com.nutanix.gts.{FUNC_NAME}',
