@@ -185,7 +185,7 @@ def main(context: Context):
         data['detail']['outputGroupDetails'].append(
             {
                 'type': 'HLS_GROUP',
-                'playlistFilePaths': playlistFilePaths
+                'playlistFilePaths': playlistFilePaths.sort(reverse=True)
             }
         )
 

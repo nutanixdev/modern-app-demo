@@ -67,6 +67,7 @@ def main(context: Context):
             'workflowName': FUNC_NAME,
             'srcBucket': srcBucket,
             'destBucket': os.environ['S3_DESTINATION_BUCKET'],
+            'cdnObjects': os.environ['S3_CDN_URL'],
         }
 
         match data['workflowTrigger']:
