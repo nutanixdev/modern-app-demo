@@ -62,12 +62,12 @@ def main(context: Context):
             match output['type']:
                 case 'HLS_GROUP':
                     video['hlsPlaylist'] = output['playlistFilePaths'][0]
-                    video['hlsUrl'] = f"https://{data['cdnObjects']}/{video['hlsPlaylist']}"
+                    video['hlsUrl'] = f"https://{data['cdnObjects']}/{video['destBucket']}/{video['hlsPlaylist']}"
 
                     break
                 case 'DASH_ISO_GROUP':
                     video['dashPlaylist'] = output['playlistFilePaths'][0]
-                    video['dashUrl'] = f"https://{data['cdnObjects']}/{video['dashPlaylist']}"
+                    video['dashUrl'] = f"https://{data['cdnObjects']}/{video['destBucket']}/{video['dashPlaylist']}"
 
                     break
 
