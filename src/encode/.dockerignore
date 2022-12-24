@@ -1,0 +1,11 @@
+Dockerfile
+Procfile
+README.md
+test_*
+*.pyc
+*.pyo
+*.pyd
+*.orig
+*.yaml
+__pycache__
+.func

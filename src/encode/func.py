@@ -3,15 +3,17 @@ import logging
 import os
 import shutil
 import subprocess
+from pathlib import Path
 
 import boto3
-from botocore.config import Config
+import urllib3
 from botocore.exceptions import ClientError
 from cloudevents.conversion import to_json
 from parliament import Context
 
-SSL_VERIFY = os.environ.get("SSL_VERIFY", False)
-FUNC_NAME = os.environ['K_SERVICE']
+urllib3.disable_warnings()
+
+FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -37,34 +39,23 @@ RENDITIONS = [
         'maxrate': '5671k', 'bufsize': '7950k'},
 ]
 
-FFMPEG_PATH = "/usr/local/bin"
-FFMPEG_BIN = "ffmpeg"
-FFMPEG_EXEC = os.path.join(FFMPEG_PATH, FFMPEG_BIN)
-
 S3_DESTINATION_BUCKET = os.environ.get("S3_DESTINATION_BUCKET", None)
 
 
 def s3_client():
+    SSL_VERIFY = os.environ.get('SSL_VERIFY', False)
     AWS_REGION = os.environ['AWS_REGION']
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_S3_ENDPOINT_URL = os.environ['AWS_S3_ENDPOINT_URL']
-
-    boto_config = Config(
-        region_name=AWS_REGION,
-        s3={
-            # 'addressing_style': 'virtual',
-            'signature_version': 's3v4'
-        }
-    )
 
     session = boto3.Session()
     return session.client('s3',
                           endpoint_url=AWS_S3_ENDPOINT_URL,
                           aws_access_key_id=AWS_ACCESS_KEY_ID,
                           aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-                          verify=SSL_VERIFY,
-                          config=boto_config)
+                          region_name=AWS_REGION,
+                          verify=SSL_VERIFY)
 
 
 def get_signed_url(bucket, obj):
@@ -110,14 +101,19 @@ def main(context: Context):
         srcBucket = data['srcBucket']
         srcVideo = data['srcVideo']
         guid = data['guid']
+        encodingProfile = data['encodingProfile']
 
-        os.makedirs(f'output/{guid}')
+        # To add output from encoding
+        data['detail'] = {}
+        data['detail']['outputGroupDetails'] = []
+
+        Path(f'output/{guid}').mkdir(parents=True, exist_ok=True)
 
         signed_url = get_signed_url(
             srcBucket, srcVideo)
         logger.info(f'SIGNED URL:: {signed_url}', extra=source_attributes)
 
-        command = [FFMPEG_EXEC, '-i', signed_url,
+        command = ['ffmpeg', '-i', signed_url,
                    '-ar', '48000', '-c:a', 'aac', '-c:v', 'h264', '-crf', '20',
                    '-g', '48', '-hls_playlist_type', 'vod',
                    '-hls_segment_filename', f'output/{guid}/%v_%03d.ts', '-hls_time', '4',
@@ -129,12 +125,16 @@ def main(context: Context):
         params_stream_maps_args = []
 
         for i, v in enumerate(RENDITIONS):
-            params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0'])
-            params_stream_maps_args.append(f'v:{i},a:{i},name:{v["name"]}')
-
             w = v['resolution'].split(
                 'x')[0]
             h = v['resolution'].split('x')[1]
+
+            if int(h) > encodingProfile:
+                break
+
+            params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0'])
+            params_stream_maps_args.append(f'v:{i},a:{i},name:{v["name"]}')
+
             scale_filter = [
                 f'-filter:v:{i}',
                 f'scale=w={w}:h={h}:force_original_aspect_ratio=decrease',
@@ -160,13 +160,15 @@ def main(context: Context):
 
         subprocess.check_output(command)
 
+        playlistFilePaths = []
+
         for root, dirs, files in os.walk(f'output/{guid}'):
             for filename in files:
 
                 # construct the full local path
                 local_path = os.path.join(root, filename)
 
-                # construct the full Dropbox path
+                # construct the full Objects path
                 relative_path = os.path.relpath(local_path, f'output/{guid}')
                 s3_path = os.path.join(guid, relative_path)
 
@@ -175,7 +177,21 @@ def main(context: Context):
 
                 upload_file(local_path, S3_DESTINATION_BUCKET, s3_path)
 
+                playlistFilePaths.append(s3_path)
+
+        playlistFilePaths.sort(reverse=True)
+
+        data['detail']['outputGroupDetails'].append(
+            {
+                'type': 'HLS_GROUP',
+                'playlistFilePaths': playlistFilePaths
+            }
+        )
+
         shutil.rmtree(f'output/{guid}')
+
+        logger.info(f'RESPONSE:: {json.dumps(data)}',
+                    extra=source_attributes)
 
         attributes = {
             "type": f'com.nutanix.gts.{FUNC_NAME}',

@@ -8,7 +8,6 @@ import boto3
 from cloudevents.conversion import to_json
 from parliament import Context
 
-SSL_VERIFY = os.environ.get('SSL_VERIFY', False)
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
@@ -28,6 +27,7 @@ def categorize_source_file(filename):
 
 
 def s3_client():
+    SSL_VERIFY = os.environ.get('SSL_VERIFY', False)
     AWS_REGION = os.environ['AWS_REGION']
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
@@ -38,6 +38,7 @@ def s3_client():
                           endpoint_url=AWS_S3_ENDPOINT_URL,
                           aws_access_key_id=AWS_ACCESS_KEY_ID,
                           aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                          region_name=AWS_REGION,
                           verify=SSL_VERIFY)
 
 
@@ -49,6 +50,11 @@ def main(context: Context):
 
     try:
         srcBucket = context.cloud_event.data['Records'][0]['s3']['bucket']['name']
+        if srcBucket != os.environ['S3_SOURCE_BUCKET']:
+            logger.info(
+                f'IGNORING:: Request for bucket {srcBucket}', extra=source_attributes)
+            return {}
+
         srcFile = context.cloud_event.data['Records'][0]['s3']['object']['key']
 
         data = {
@@ -61,6 +67,7 @@ def main(context: Context):
             'workflowName': FUNC_NAME,
             'srcBucket': srcBucket,
             'destBucket': os.environ['S3_DESTINATION_BUCKET'],
+            'cdnObjects': os.environ['S3_CDN_URL'],
         }
 
         match data['workflowTrigger']:
