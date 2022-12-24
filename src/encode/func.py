@@ -6,9 +6,12 @@ import subprocess
 from pathlib import Path
 
 import boto3
+import urllib3
 from botocore.exceptions import ClientError
 from cloudevents.conversion import to_json
 from parliament import Context
+
+urllib3.disable_warnings()
 
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
@@ -35,10 +38,6 @@ RENDITIONS = [
         'bitrate': '5300k', 'audiorate': '192k',
         'maxrate': '5671k', 'bufsize': '7950k'},
 ]
-
-# FFMPEG_PATH = "/usr/local/bin"
-# FFMPEG_BIN = "ffmpeg"
-# FFMPEG_EXEC = os.path.join(FFMPEG_PATH, FFMPEG_BIN)
 
 S3_DESTINATION_BUCKET = os.environ.get("S3_DESTINATION_BUCKET", None)
 
@@ -110,8 +109,6 @@ def main(context: Context):
 
         Path(f'output/{guid}').mkdir(parents=True, exist_ok=True)
 
-        # os.makedirs(f'output/{guid}')
-
         signed_url = get_signed_url(
             srcBucket, srcVideo)
         logger.info(f'SIGNED URL:: {signed_url}', extra=source_attributes)
@@ -171,7 +168,7 @@ def main(context: Context):
                 # construct the full local path
                 local_path = os.path.join(root, filename)
 
-                # construct the full Dropbox path
+                # construct the full Objects path
                 relative_path = os.path.relpath(local_path, f'output/{guid}')
                 s3_path = os.path.join(guid, relative_path)
 

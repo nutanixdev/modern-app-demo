@@ -1,14 +1,19 @@
-FROM quay.io/fedora/python-311
+FROM python:3.10-slim
 
-USER 0
+ENV PYTHONUNBUFFERED True
 
-COPY . /tmp/src
-RUN /usr/bin/fix-permissions /tmp/src
+ENV APP_HOME /app
 
 USER 1001
 
-# Install the dependencies
-RUN /usr/libexec/s2i/assemble
+WORKDIR $APP_HOME
+COPY . ./
+
+USER 0
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+USER 1001
 
 # Set the default command for the resulting image
 CMD python -m parliament .
