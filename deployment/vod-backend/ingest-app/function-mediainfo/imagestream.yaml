@@ -1,0 +1,14 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: mediainfo
+  namespace: vod-backend
+  labels:
+    app: mediainfo
+    app.kubernetes.io/instance: mediainfo
+    app.kubernetes.io/component: mediainfo
+    app.kubernetes.io/name: mediainfo
+    app.kubernetes.io/part-of: ingest-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''

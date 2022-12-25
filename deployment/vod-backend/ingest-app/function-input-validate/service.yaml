@@ -1,0 +1,51 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: input-validate
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: input-validate
+    app.kubernetes.io/component: input-validate
+    app.kubernetes.io/name: input-validate
+    app.kubernetes.io/part-of: ingest-app
+    networking.knative.dev/visibility: cluster-local
+  annotations:
+    app.openshift.io/route-disabled: 'false'
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"input-validate:latest","namespace":"vod-backend"},"fieldPath":"spec.template.spec.containers[?(@.name==\"input-validate\")].image","pause":"false"}]'
+spec:
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: input-validate
+        app.kubernetes.io/component: input-validate
+        app.kubernetes.io/part-of: ingest-app
+      annotations:
+        autoscaling.knative.dev/target: '100'
+        autoscaling.knative.dev/window: 60s
+        autoscaling.knative.dev/targetUtilizationPercentage: '70'
+        client.knative.dev/user-image: image-registry.openshift-image-registry.svc:5000/vod-backend/input-validate
+    spec:
+      containerConcurrency: 0
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: vod-config
+        name: input-validate
+        image: image-registry.openshift-image-registry.svc:5000/vod-backend/input-validate
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+        env: []
+        resources: {}
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100

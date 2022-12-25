@@ -1,0 +1,72 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: mongoprocess
+  namespace: vod-backend
+  labels:
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    app.kubernetes.io/instance: mongoprocess
+    app.kubernetes.io/name: mongoprocess
+spec:
+  params:
+  - name: APP_NAME
+    type: string
+  - name: GIT_REPO
+    type: string
+    default: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    type: string
+    default: image-registry.openshift-image-registry.svc:5000/vod-backend/mongoprocess
+  - default: src/mongo
+    name: PATH_CONTEXT
+    type: string
+  tasks:
+  - name: fetch-repository
+    params:
+    - name: url
+      value: "$(params.GIT_REPO)"
+    - name: subdirectory
+      value: ''
+    - name: deleteExisting
+      value: 'true'
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: workspace
+  - name: build
+    params:
+    - name: IMAGE
+      value: "$(params.IMAGE_NAME)"
+    - name: TLSVERIFY
+      value: 'false'
+    - name: CONTEXT
+      value: "$(params.PATH_CONTEXT)"
+    runAfter:
+    - fetch-repository
+    taskRef:
+      kind: ClusterTask
+      name: buildah
+    workspaces:
+    - name: source
+      workspace: workspace
+  - name: kn-service-update
+    params:
+    - name: ARGS
+      value:
+      - service
+      - update
+      - "$(params.APP_NAME)"
+      - "--image=$(params.IMAGE_NAME)"
+    - name: kn-image
+      value: gcr.io/knative-releases/knative.dev/client/cmd/kn
+    runAfter:
+    - build
+    taskRef:
+      kind: ClusterTask
+      name: kn
+  workspaces:
+  - name: workspace

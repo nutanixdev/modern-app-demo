@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: mongoprocess-initial
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: mongoprocess
+    app.kubernetes.io/name: mongoprocess
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    tekton.dev/pipeline: mongoprocess
+spec:
+  pipelineRef:
+    name: mongoprocess
+  params:
+  - name: APP_NAME
+    value: mongoprocess
+  - name: GIT_REPO
+    value: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/vod-backend/mongoprocess
+  - name: PATH_CONTEXT
+    value: src/mongo
+  resources: []
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          tekton.dev/pipeline: mongoprocess
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: encode-initial
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: encode
+    app.kubernetes.io/name: encode
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    tekton.dev/pipeline: encode
+spec:
+  pipelineRef:
+    name: encode
+  params:
+  - name: APP_NAME
+    value: encode
+  - name: GIT_REPO
+    value: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/vod-backend/encode
+  - name: PATH_CONTEXT
+    value: src/encode
+  resources: []
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          tekton.dev/pipeline: encode
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

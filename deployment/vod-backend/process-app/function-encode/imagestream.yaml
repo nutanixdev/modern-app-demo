@@ -1,0 +1,14 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: encode
+  namespace: vod-backend
+  labels:
+    app: encode
+    app.kubernetes.io/instance: encode
+    app.kubernetes.io/component: encode
+    app.kubernetes.io/name: encode
+    app.kubernetes.io/part-of: process-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''

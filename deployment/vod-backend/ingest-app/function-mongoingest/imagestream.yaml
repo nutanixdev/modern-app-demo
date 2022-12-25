@@ -1,0 +1,14 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: mongoingest
+  namespace: vod-backend
+  labels:
+    app: mongoingest
+    app.kubernetes.io/instance: mongoingest
+    app.kubernetes.io/component: mongoingest
+    app.kubernetes.io/name: mongoingest
+    app.kubernetes.io/part-of: ingest-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''

@@ -1,0 +1,52 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: mediainfo
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: mediainfo
+    app.kubernetes.io/component: mediainfo
+    app.kubernetes.io/name: mediainfo
+    app.kubernetes.io/part-of: ingest-app
+    networking.knative.dev/visibility: cluster-local
+  annotations:
+    app.openshift.io/route-disabled: 'false'
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"mediainfo:latest","namespace":"vod-backend"},"fieldPath":"spec.template.spec.containers[?(@.name==\"mediainfo\")].image","pause":"false"}]'
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: mediainfo
+        app.kubernetes.io/component: mediainfo
+        app.kubernetes.io/part-of: ingest-app
+      annotations:
+        autoscaling.knative.dev/target: '100'
+        autoscaling.knative.dev/window: 60s
+        autoscaling.knative.dev/targetUtilizationPercentage: '70'
+        client.knative.dev/user-image: image-registry.openshift-image-registry.svc:5000/vod-backend/mediainfo
+    spec:
+      containerConcurrency: 0
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: vod-config
+        - secretRef:
+            name: vod-objects
+        image: image-registry.openshift-image-registry.svc:5000/vod-backend/mediainfo
+        imagePullPolicy: Always
+        name: mediainfo
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100
