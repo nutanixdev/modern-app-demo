@@ -1,0 +1,18 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: kafka-input-validate
+  namespace: vod-backend
+  labels:
+    eventing.knative.dev/broker: default
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: dev.knative.kafka.event
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: input-validate
+      namespace: vod-backend

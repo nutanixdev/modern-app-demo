@@ -1,0 +1,59 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    app.openshift.io/route-disabled: "false"
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"encode:latest","namespace":"vod-backend"},"fieldPath":"spec.template.spec.containers[?(@.name==\"encode\")].image","pause":"false"}]'
+  labels:
+    app.kubernetes.io/component: encode
+    app.kubernetes.io/instance: encode
+    app.kubernetes.io/name: encode
+    app.kubernetes.io/part-of: process-app
+    networking.knative.dev/visibility: cluster-local
+  name: encode
+  namespace: vod-backend
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/target: "100"
+        autoscaling.knative.dev/targetUtilizationPercentage: "70"
+        autoscaling.knative.dev/window: 60s
+        client.knative.dev/user-image: image-registry.openshift-image-registry.svc:5000/vod-backend/encode
+      labels:
+        app.kubernetes.io/component: encode
+        app.kubernetes.io/instance: encode
+        app.kubernetes.io/part-of: process-app
+    spec:
+      containerConcurrency: 1
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: vod-config
+        - secretRef:
+            name: vod-objects
+        image: image-registry.openshift-image-registry.svc:5000/vod-backend/encode
+        imagePullPolicy: Always
+        name: encode
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+        volumeMounts:
+        - mountPath: /app/output
+          name: encode
+      volumes:
+      - name: encode
+        persistentVolumeClaim:
+          claimName: encode-nfs
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100

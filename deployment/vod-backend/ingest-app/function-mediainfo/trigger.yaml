@@ -1,0 +1,18 @@
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: input-validate-mediainfo
+  namespace: vod-backend
+  labels:
+    eventing.knative.dev/broker: default
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: com.nutanix.gts.input-validate
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: mediainfo
+      namespace: vod-backend

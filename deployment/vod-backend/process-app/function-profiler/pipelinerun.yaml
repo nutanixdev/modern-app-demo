@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: profiler-initial
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: profiler
+    app.kubernetes.io/name: profiler
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    tekton.dev/pipeline: profiler
+spec:
+  pipelineRef:
+    name: profiler
+  params:
+  - name: APP_NAME
+    value: profiler
+  - name: GIT_REPO
+    value: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/vod-backend/profiler
+  - name: PATH_CONTEXT
+    value: src/profiler
+  resources: []
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          tekton.dev/pipeline: profiler
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

@@ -1,0 +1,14 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: output-validate
+  namespace: vod-backend
+  labels:
+    app: output-validate
+    app.kubernetes.io/instance: output-validate
+    app.kubernetes.io/component: output-validate
+    app.kubernetes.io/name: output-validate
+    app.kubernetes.io/part-of: publish-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''

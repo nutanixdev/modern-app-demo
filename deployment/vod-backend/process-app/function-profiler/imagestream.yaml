@@ -1,0 +1,14 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: profiler
+  namespace: vod-backend
+  labels:
+    app: profiler
+    app.kubernetes.io/instance: profiler
+    app.kubernetes.io/component: profiler
+    app.kubernetes.io/name: profiler
+    app.kubernetes.io/part-of: process-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''

@@ -1,0 +1,198 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: profiler
+  namespace: vod-backend
+  labels:
+    app: profiler
+    app.kubernetes.io/instance: profiler
+    app.kubernetes.io/component: profiler
+    app.kubernetes.io/name: profiler
+    app.kubernetes.io/part-of: process-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: profiler
+  namespace: vod-backend
+  labels:
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    app.kubernetes.io/instance: profiler
+    app.kubernetes.io/name: profiler
+spec:
+  params:
+  - name: APP_NAME
+    type: string
+    default: profiler
+  - name: GIT_REPO
+    type: string
+    default: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    type: string
+    default: image-registry.openshift-image-registry.svc:5000/vod-backend/profiler
+  - default: src/profiler
+    name: PATH_CONTEXT
+    type: string
+  tasks:
+  - name: fetch-repository
+    params:
+    - name: url
+      value: "$(params.GIT_REPO)"
+    - name: subdirectory
+      value: ''
+    - name: deleteExisting
+      value: 'true'
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: workspace
+  - name: build
+    params:
+    - name: IMAGE
+      value: "$(params.IMAGE_NAME)"
+    - name: TLSVERIFY
+      value: 'false'
+    - name: CONTEXT
+      value: "$(params.PATH_CONTEXT)"
+    runAfter:
+    - fetch-repository
+    taskRef:
+      kind: ClusterTask
+      name: buildah
+    workspaces:
+    - name: source
+      workspace: workspace
+  - name: kn-service-update
+    params:
+    - name: ARGS
+      value:
+      - service
+      - update
+      - "$(params.APP_NAME)"
+      - "--image=$(params.IMAGE_NAME)"
+    - name: kn-image
+      value: gcr.io/knative-releases/knative.dev/client/cmd/kn
+    runAfter:
+    - build
+    taskRef:
+      kind: ClusterTask
+      name: kn
+  workspaces:
+  - name: workspace
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: profiler-initial
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: profiler
+    app.kubernetes.io/name: profiler
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    tekton.dev/pipeline: profiler
+spec:
+  pipelineRef:
+    name: profiler
+  params:
+  - name: APP_NAME
+    value: profiler
+  - name: GIT_REPO
+    value: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/vod-backend/profiler
+  - name: PATH_CONTEXT
+    value: src/profiler
+  resources: []
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          tekton.dev/pipeline: profiler
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    app.openshift.io/route-disabled: "false"
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"profiler:latest","namespace":"vod-backend"},"fieldPath":"spec.template.spec.containers[?(@.name==\"profiler\")].image","pause":"false"}]'
+  labels:
+    app.kubernetes.io/component: profiler
+    app.kubernetes.io/instance: profiler
+    app.kubernetes.io/name: profiler
+    app.kubernetes.io/part-of: process-app
+    networking.knative.dev/visibility: cluster-local
+  name: profiler
+  namespace: vod-backend
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/target: "100"
+        autoscaling.knative.dev/targetUtilizationPercentage: "70"
+        autoscaling.knative.dev/window: 60s
+        client.knative.dev/user-image: image-registry.openshift-image-registry.svc:5000/vod-backend/profiler
+      labels:
+        app.kubernetes.io/component: profiler
+        app.kubernetes.io/instance: profiler
+        app.kubernetes.io/part-of: process-app
+    spec:
+      containerConcurrency: 0
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: vod-config
+        - secretRef:
+            name: vod-mongodb
+        image: image-registry.openshift-image-registry.svc:5000/vod-backend/profiler
+        imagePullPolicy: Always
+        name: profiler
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100
+---
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: mongoingest-profiler
+  namespace: vod-backend
+  labels:
+    eventing.knative.dev/broker: default
+spec:
+  broker: default
+  filter:
+    attributes:
+      type: com.nutanix.gts.mongoingest
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: profiler
+      namespace: vod-backend

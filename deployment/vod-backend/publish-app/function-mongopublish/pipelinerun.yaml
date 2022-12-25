@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: mongopublish-initial
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: mongopublish
+    app.kubernetes.io/name: mongopublish
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    tekton.dev/pipeline: mongopublish
+spec:
+  pipelineRef:
+    name: mongopublish
+  params:
+  - name: APP_NAME
+    value: mongopublish
+  - name: GIT_REPO
+    value: https://github.com/nutanixdev/modern-app-demo.git
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/vod-backend/mongopublish
+  - name: PATH_CONTEXT
+    value: src/mongo
+  resources: []
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          tekton.dev/pipeline: mongopublish
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

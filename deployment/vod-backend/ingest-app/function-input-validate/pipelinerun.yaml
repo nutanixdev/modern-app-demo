@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: input-validate-initial
+  namespace: vod-backend
+  labels:
+    app.kubernetes.io/instance: input-validate
+    app.kubernetes.io/name: input-validate
+    operator.tekton.dev/operand-name: openshift-pipelines-addons
+    pipeline.openshift.io/strategy: docker
+    pipeline.openshift.io/type: knative
+    tekton.dev/pipeline: input-validate
+spec:
+  pipelineRef:
+    name: input-validate
+  params:
+  - name: APP_NAME
+    value: input-validate
+  - name: GIT_REPO
+    value: https://github.com/nutanixdev/modern-app-demo.git
+  - name: GIT_REVISION
+    value: ''
+  - name: IMAGE_NAME
+    value: image-registry.openshift-image-registry.svc:5000/vod-backend/input-validate
+  - name: PATH_CONTEXT
+    value: src/input-validate
+  resources: []
+  workspaces:
+  - name: workspace
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          tekton.dev/pipeline: input-validate
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  status:
