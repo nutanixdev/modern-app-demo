@@ -6,6 +6,7 @@ ENV PYTHONUNBUFFERED 1
 ARG NODE_VERSION="none"
 ARG OPENSHIFT_CLI_VERSION="latest"
 ARG KNATIVE_CLI_VERSION="latest"
+ARG KNATIVE_FUNC_VERSION="latest"
 
 COPY .devcontainer/library-scripts/*.sh /tmp/library-scripts/
 
@@ -22,6 +23,11 @@ RUN if [ "${OPENSHIFT_CLI_VERSION}" != "none" ]; then \
 # Install Knative CLI
 RUN if [ "${KNATIVE_CLI_VERSION}" != "none" ]; then \
         bash /tmp/library-scripts/kncli-linux.sh "${KNATIVE_CLI_VERSION}"; \
+    fi 
+
+# Install Knative func plugin
+RUN if [ "${KNATIVE_FUNC_VERSION}" != "none" ]; then \
+        bash /tmp/library-scripts/knfunc-linux.sh "${KNATIVE_FUNC_VERSION}"; \
     fi 
 
 # [Optional] If your requirements rarely change, uncomment this section to add them to the image.

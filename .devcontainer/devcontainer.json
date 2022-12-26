@@ -9,9 +9,9 @@
         // "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
         "ghcr.io/devcontainers/features/docker-in-docker:1": {}
     },
-    // "extensions": [
-    // 	"mongodb.mongodb-vscode"
-    // ]
+    "extensions": [
+        "richie5um2.vscode-statusbar-json-path"
+    ]
     // Features to add to the dev container. More info: https://containers.dev/implementors/features.
     // "features": {},
     // Use 'forwardPorts' to make a list of ports inside the container available locally.

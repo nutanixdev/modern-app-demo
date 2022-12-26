@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block head_title %}
+Portal
+{% endblock %}
+
+{% block content %}
+
+<div class="position-relative overflow-hidden m-md-2">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for video in videos %}
+        {% if video.workflowStatus == 'Complete' %}
+        {% include "watchlist/details.html" %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

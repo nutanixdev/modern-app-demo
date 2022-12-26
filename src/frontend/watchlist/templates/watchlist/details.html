@@ -1,0 +1,18 @@
+<div class="col">
+    <div class="card h-100">
+        <img src="{{ video.thumbnail }}" class="card-img-top">
+        <div class="card-body">
+            <h5 class="card-title">{{ video.srcVideo }}</h5>
+            <!-- <p class="card-text">This is a wider card.</p> -->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">Duration: {{ video.srcMediainfo.container.duration|floatformat:"0" }}
+                    seconds</li>
+                <li class="list-group-item">Size: {{ video.srcMediainfo.container.fileSize|filesizeformat }}</li>
+            </ul>
+            <a href="{% url 'play-video' video.guid %}" class="btn btn-primary">Watch</a>
+        </div>
+        <div class="card-footer">
+            <small class="text-muted">Uploaded {{ video.endTime }}</small>
+        </div>
+    </div>
+</div>
