@@ -8,7 +8,7 @@ from botocore.config import Config
 from cloudevents.conversion import to_json
 from parliament import Context
 
-SSL_VERIFY = os.environ.get("SSL_VERIFY", False)
+SSL_VERIFY = os.environ.get("SSL_VERIFY", True)
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
@@ -118,6 +118,7 @@ def s3_client():
                           endpoint_url=AWS_S3_ENDPOINT_URL,
                           aws_access_key_id=AWS_ACCESS_KEY_ID,
                           aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+                          region_name=AWS_REGION,
                           verify=SSL_VERIFY)
 
 

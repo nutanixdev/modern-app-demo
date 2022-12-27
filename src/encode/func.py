@@ -13,6 +13,7 @@ from parliament import Context
 
 urllib3.disable_warnings()
 
+SSL_VERIFY = os.environ.get('SSL_VERIFY', True)
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
@@ -43,7 +44,6 @@ S3_DESTINATION_BUCKET = os.environ.get("S3_DESTINATION_BUCKET", None)
 
 
 def s3_client():
-    SSL_VERIFY = os.environ.get('SSL_VERIFY', False)
     AWS_REGION = os.environ['AWS_REGION']
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
