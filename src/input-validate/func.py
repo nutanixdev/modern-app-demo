@@ -2,12 +2,14 @@ import json
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
 from uuid import uuid4
 
 import boto3
 from cloudevents.conversion import to_json
 from parliament import Context
 
+SSL_VERIFY = os.environ.get("SSL_VERIFY", True)
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
@@ -27,7 +29,6 @@ def categorize_source_file(filename):
 
 
 def s3_client():
-    SSL_VERIFY = os.environ.get('SSL_VERIFY', False)
     AWS_REGION = os.environ['AWS_REGION']
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
@@ -91,6 +92,7 @@ def main(context: Context):
 
             case 'Video':
                 data['srcVideo'] = srcFile
+                data['title'] = Path(srcFile).stem
 
         attributes = {
             "type": f'com.nutanix.gts.{FUNC_NAME}',
