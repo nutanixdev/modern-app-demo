@@ -9,7 +9,7 @@ import boto3
 from cloudevents.conversion import to_json
 from parliament import Context
 
-SSL_VERIFY = os.environ.get("SSL_VERIFY", True)
+SSL_VERIFY = os.environ.get("SSL_VERIFY", "True") == "True"
 FUNC_NAME = os.environ.get('K_SERVICE', 'local')
 
 FORMAT = f'%(asctime)s %(id)-36s {FUNC_NAME} %(message)s'
