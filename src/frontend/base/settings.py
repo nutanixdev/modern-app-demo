@@ -169,7 +169,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # VOD
 VOD_BACKEND_API = env.str(
-    "VOD_BACKEND_API", None)
+    "VOD_BACKEND_API")
 
 # Allauth
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
