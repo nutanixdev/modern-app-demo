@@ -1,10 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'index.html' %}
 
 {% load static %}
 
 {% block extra_head %}
-<link href="{% static 'js/video-js-7.21.1/video-js.min.css' %}" rel="stylesheet" />
-<link href="{% static 'js/videojs-hls-quality-selector-1.1.4/videojs-hls-quality-selector.css' %}" rel="stylesheet" />
+<link href="{% static 'video-js-7.21.1/video-js.min.css' %}" rel="stylesheet" />
+<link href="{% static 'videojs-hls-quality-selector-1.1.4/videojs-hls-quality-selector.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -20,9 +20,9 @@
 {% endblock %}
 
 {% block extra_body %}
-<script src="{% static 'js/video-js-7.21.1/video.min.js' %}"></script>
-<script src="{% static 'js/videojs-contrib-quality-levels-3.0.0/videojs-contrib-quality-levels.min.js' %}"></script>
-<script src="{% static 'js/videojs-hls-quality-selector-1.1.4/videojs-hls-quality-selector.min.js' %}"></script>
+<script src="{% static 'video-js-7.21.1/video.min.js' %}"></script>
+<script src="{% static 'videojs-contrib-quality-levels-3.0.0/videojs-contrib-quality-levels.min.js' %}"></script>
+<script src="{% static 'videojs-hls-quality-selector-1.1.4/videojs-hls-quality-selector.min.js' %}"></script>
 <script>
     var player = videojs('my-player', {
         controls: true,

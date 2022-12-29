@@ -41,7 +41,8 @@ SSL_VERIFY = env.bool("SSL_VERIFY", default=True)
 # Application definition
 
 LOCAL_APPS = [
-    "watchlist.apps.WatchlistConfig",
+    "watchlist",
+    "accounts",
 ]
 
 THIRD_PARTY_APPS = [
@@ -115,25 +116,30 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
+# AUTH_PASSWORD_VALIDATORS = [
+#         {
+#             "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+#         },
+#     {
+#         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+#         'OPTIONS': {
+#             'min_length': 6,
+#         }
+#     },
+#         {
+#             "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+#         },
+#         {
+#             "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+#         },
+# ]
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -151,9 +157,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
-
+STATIC_ROOT = "static"
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / "staticfiles",
 ]
 
 # Default primary key field type
@@ -165,6 +171,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 VOD_BACKEND_API = "https://api-vod-backend.apps.ocp07.ntnxlab.local"
 
 # Allauth
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
