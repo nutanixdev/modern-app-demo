@@ -168,7 +168,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # VOD
-VOD_BACKEND_API = "https://api-vod-backend.apps.ocp07.ntnxlab.local"
+VOD_BACKEND_API = env.str(
+    "VOD_BACKEND_API", None)
 
 # Allauth
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
