@@ -1,0 +1,38 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: vod-backend
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vod-objects
+  namespace: vod-backend
+stringData:
+  AWS_ACCESS_KEY_ID: <YOUR_ADMINUSER_ACCESS_KEY>
+  AWS_SECRET_ACCESS_KEY: <YOUR_ADMINUSER_SECRET_KEY>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vod-mongodb
+  namespace: vod-backend
+stringData:
+  MONGODB_USERNAME: mongodb
+  MONGODB_PASSWORD: mongodb
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vod-config
+  namespace: vod-backend
+data:
+  MONGODB_ADDRESS: mongodb
+  MONGODB_PORT: '27017'
+  MONGODB_DATABASE: vod
+  AWS_REGION: us-east-1
+  AWS_S3_ENDPOINT_URL: https://primary-objects.ntnxlab.local
+  S3_SOURCE_BUCKET: <YOUR_VIDEO_INPUT_BUCKET_NAME>
+  S3_DESTINATION_BUCKET: <YOUR_VIDEO_OUTPUT_BUCKET_NAME>
+  S3_CDN_URL: https://edge-objects.ntnxlab.local
+  SSL_VERIFY: 'False'
