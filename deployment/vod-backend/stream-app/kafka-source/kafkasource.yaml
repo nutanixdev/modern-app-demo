@@ -1,0 +1,23 @@
+apiVersion: sources.knative.dev/v1beta1
+kind: KafkaSource
+metadata:
+  name: kafka-source
+  namespace: vod-backend
+  labels:
+    app: kafka-source
+    app.kubernetes.io/instance: kafka-source
+    app.kubernetes.io/component: kafka-source
+    app.kubernetes.io/name: kafka-source
+    app.kubernetes.io/part-of: stream
+spec:
+  bootstrapServers:
+  - "kafka.ntnxlab.local:9094"
+  consumerGroup: <YOUR_CLUSTER_NAME_HERE> # e.g. ocp08
+  sink:
+    ref:
+      apiVersion: eventing.knative.dev/v1
+      kind: Broker
+      name: default
+      namespace: vod-backend
+  topics:
+  - OSSEvents
