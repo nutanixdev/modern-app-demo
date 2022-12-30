@@ -1,0 +1,9 @@
+apiVersion: helm.openshift.io/v1beta1
+kind: ProjectHelmChartRepository
+metadata:
+ name: bitnami
+ namespace: vod-backend
+spec:
+ connectionConfig:
+   url: 'https://charts.bitnami.com/bitnami'
+ name: bitnami

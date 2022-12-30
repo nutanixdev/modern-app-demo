@@ -1,0 +1,30 @@
+arbiter:
+ containerSecurityContext:
+   enabled: false
+ podSecurityContext:
+   enabled: false
+architecture: standalone
+auth:
+ enabled: true
+ databases:
+   - vod
+ usernames:
+   - mongodb
+ passwords:
+   - mongodb
+ rootPassword: mongodb
+ rootUser: mongodb
+containerSecurityContext:
+ enabled: false
+hidden:
+ containerSecurityContext:
+   enabled: false
+ podSecurityContext:
+   enabled: false
+podSecurityContext:
+ enabled: false
+replicaCount: 1
+resources:
+ requests:
+   cpu: 500m
+   memory: 384Mi
