@@ -1,0 +1,51 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: api
+  namespace: vod-backend
+  labels:
+    app: api
+    app.kubernetes.io/instance: api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/name: api
+    app.openshift.io/runtime: python
+    app.kubernetes.io/part-of: api-app
+    app.openshift.io/runtime-version: 3.9-ubi8
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+    app.openshift.io/route-disabled: 'false'
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"mongodb"}]'
+spec:
+  selector:
+    app: api
+    deploymentconfig: api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api
+        deploymentconfig: api
+    spec:
+      containers:
+      - name: api
+        image: api:latest
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: vod-config
+          - secretRef:
+              name: vod-mongodb
+        resources: {}
+  triggers:
+  - type: ImageChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+      - api
+      from:
+        kind: ImageStreamTag
+        name: api:latest
+  - type: ConfigChange

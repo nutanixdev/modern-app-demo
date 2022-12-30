@@ -1,0 +1,25 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: api
+  namespace: vod-backend
+  labels:
+    app: api
+    app.kubernetes.io/instance: api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/name: api
+    app.openshift.io/runtime: python
+    app.kubernetes.io/part-of: api-app
+    app.openshift.io/runtime-version: 3.9-ubi8
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+spec:
+  selector:
+    app: api
+    deploymentconfig: api
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: 8080-tcp
