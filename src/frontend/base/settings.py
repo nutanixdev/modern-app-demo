@@ -67,7 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -171,6 +171,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 VOD_BACKEND_API = env.str(
     "VOD_BACKEND_API")
 
+# Objects
+SIGNED_URL_EXPIRATION = 3600
+
+# AWS_S3_SIGNATURE_VERSION = env.str(
+#     "AWS_S3_SIGNATURE_VERSION", default="s3v4")
+AWS_S3_ENDPOINT_URL = env.str(
+    "AWS_S3_ENDPOINT_URL", None)
+
+AWS_REGION = env.str("AWS_REGION", default="us-east-1")
+AWS_ACCESS_KEY_ID = env.str("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env.str("AWS_SECRET_ACCESS_KEY")
+
+
 # Allauth
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -179,31 +192,3 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 LOGIN_REDIRECT_URL = 'index'
-
-# Whitenoise
-FILE_UPLOAD_STORAGE = env.str(
-    "FILE_UPLOAD_STORAGE", default="local")  # local | s3
-
-if FILE_UPLOAD_STORAGE == "local":
-    MEDIA_ROOT_NAME = "media"
-    MEDIA_ROOT = BASE_DIR / MEDIA_ROOT_NAME
-    MEDIA_URL = f"/{MEDIA_ROOT_NAME}/"
-
-if FILE_UPLOAD_STORAGE == "s3":
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-    AWS_S3_ENDPOINT_URL = env.str(
-        "AWS_S3_ENDPOINT_URL", None)
-    AWS_S3_SIGNATURE_VERSION = env.str(
-        "AWS_S3_SIGNATURE_VERSION", default="s3v4")
-
-    AWS_S3_ACCESS_KEY_ID = env.str("AWS_S3_ACCESS_KEY_ID")
-    AWS_S3_SECRET_ACCESS_KEY = env.str("AWS_S3_SECRET_ACCESS_KEY")
-    AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME", default="us-east-1")
-
-    AWS_STORAGE_BUCKET_NAME = env.str("AWS_STORAGE_BUCKET_NAME")
-
-    # https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#canned-acl
-    AWS_DEFAULT_ACL = env.str("AWS_DEFAULT_ACL", default="public-read")
-
-    AWS_PRESIGNED_EXPIRY = env.int("AWS_PRESIGNED_EXPIRY", default=3600)
