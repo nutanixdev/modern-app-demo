@@ -18,8 +18,16 @@ SSL_VERIFY = settings.SSL_VERIFY
 @login_required
 def index(request):
     response = requests.get(URL, verify=SSL_VERIFY, timeout=5)
+
+    data = response.json()
+
+    for video in data:
+        if video.get('frameCapture'):
+            video['frameCapture'] = get_signed_url(
+                video['destBucket'], video['frameCapture'])
+
     context = {
-        'videos': response.json(),
+        'videos': data,
     }
     return render(request, 'index.html', context)
 
