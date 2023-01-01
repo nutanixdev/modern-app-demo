@@ -104,8 +104,8 @@ def main(context: Context):
         encodingProfile = data['encodingProfile']
 
         # To add output from encoding
-        data['detail'] = {}
-        data['detail']['outputGroupDetails'] = []
+        data['encodingOutput'] = {}
+        data['encodingOutput']['outputGroupDetails'] = []
 
         Path(f'output/{guid}').mkdir(parents=True, exist_ok=True)
 
@@ -191,7 +191,7 @@ def main(context: Context):
                     S3_DESTINATION_BUCKET, f'{guid}/thumbnail.png')
         data['frameCapture'] = f'{guid}/thumbnail.png'
 
-        data['detail']['outputGroupDetails'].append(
+        data['encodingOutput']['outputGroupDetails'].append(
             {
                 'type': 'HLS_GROUP',
                 'playlistFilePaths': playlistFilePaths
