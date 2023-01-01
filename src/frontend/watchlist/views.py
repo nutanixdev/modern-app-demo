@@ -1,18 +1,23 @@
+
+import m3u8
 import requests
 import urllib3
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseNotFound, StreamingHttpResponse
 from django.shortcuts import render
+
+from .utils import get_signed_url
 
 urllib3.disable_warnings()
 
-url = settings.VOD_BACKEND_API
+URL = settings.VOD_BACKEND_API
 SSL_VERIFY = settings.SSL_VERIFY
 
 
 @login_required
 def index(request):
-    response = requests.get(url, verify=SSL_VERIFY, timeout=5)
+    response = requests.get(URL, verify=SSL_VERIFY, timeout=5)
     context = {
         'videos': response.json(),
     }
@@ -20,12 +25,54 @@ def index(request):
 
 
 @login_required
-def play_video(request, video_id):
-    endpoint = '/'.join([url, video_id])
-    response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
+def player(request, video_guid):
+    if request.GET.get('destBucket') and request.GET.get('hlsPlaylist'):
+        bucket = request.GET['destBucket']
+        fileobj = request.GET['hlsPlaylist']
+    else:
+        endpoint = '/'.join([URL, str(video_guid)])
+        try:
+            response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
+            response.raise_for_status()
+
+            bucket = response.json()['destBucket']
+            fileobj = response.json()['hlsPlaylist']
+        except:
+            return HttpResponseNotFound(response.content)
 
     context = {
-        'video': response.json()
+        'playlist': fileobj.split("/")[-1],
+        'destBucket': bucket
     }
-
     return render(request, 'watchlist/player.html', context)
+
+
+@login_required
+def get_playlist(request, video_guid):
+    if request.GET.get('destBucket'):
+        bucket = request.GET['destBucket']
+    else:
+        endpoint = '/'.join([URL, str(video_guid)])
+        try:
+            response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
+            response.raise_for_status()
+
+            bucket = response.json()['destBucket']
+        except:
+            return HttpResponseNotFound(response.content)
+
+    fileobj = request.path.strip('/').split('/', 1)[-1]
+    signed_url = get_signed_url(bucket, fileobj)
+
+    playlist = m3u8.load(signed_url, verify_ssl=SSL_VERIFY)
+
+    if playlist.is_variant:
+        for variant in playlist.playlists:
+            variant.uri = f'{variant.uri}?destBucket={bucket}'
+    else:
+        for segment in playlist.segments:
+            ts_fileobj = '/'.join([str(video_guid), segment.uri])
+            ts_signed_url = get_signed_url(bucket, ts_fileobj)
+            segment.uri = ts_signed_url
+
+    return StreamingHttpResponse(playlist.dumps())

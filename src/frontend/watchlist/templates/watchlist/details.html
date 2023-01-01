@@ -15,7 +15,8 @@
                     Size: {{ video.srcMediainfo.container.fileSize|filesizeformat }}
                 </li>
             </ul>
-            <a href="{% url 'play-video' video.guid %}" class="btn btn-primary">Watch</a>
+            <a href="{% url 'player' video.guid %}?destBucket={{ video.destBucket }}&hlsPlaylist={{ video.hlsPlaylist }}"
+                class="btn btn-primary">Watch</a>
         </div>
         <div class="card-footer">
             <small class="text-muted">Uploaded {{ video.endTime }}</small>

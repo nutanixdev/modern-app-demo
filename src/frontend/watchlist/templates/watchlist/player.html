@@ -12,7 +12,7 @@
     <div class="container-lg">
         <div data-vjs-player="true">
             <video-js id="my-player" class="video-js vjs-big-play-centered vjs-workinghover vjs-v7">
-                <source src="{{ video.hlsUrl }}" type="application/x-mpegURL">
+                <source src="{{ playlist }}?destBucket={{ destBucket }}" type="application/x-mpegURL">
             </video-js>
         </div>
     </div>
