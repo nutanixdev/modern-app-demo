@@ -113,13 +113,6 @@ def main(context: Context):
             srcBucket, srcVideo)
         logger.info(f'SIGNED URL:: {signed_url}', extra=source_attributes)
 
-        thumbnail_command = ['ffmpeg', '-ss', '00:00:02', '-i',
-                             signed_url, '-frames:v', '1', f'output/{guid}/thumbnail.png']
-
-        subprocess.check_output(thumbnail_command)
-
-        data['frameCapture'] = f'{guid}/thumbnail.png'
-
         command = ['ffmpeg', '-i', signed_url,
                    '-ar', '48000', '-c:a', 'aac', '-c:v', 'h264', '-crf', '20',
                    '-g', '48', '-hls_playlist_type', 'vod',
@@ -187,6 +180,16 @@ def main(context: Context):
                 playlistFilePaths.append(s3_path)
 
         playlistFilePaths.sort(reverse=True)
+
+        # Create thumbnail
+        thumbnail_command = ['ffmpeg', '-ss', '00:00:05', '-i',
+                             signed_url, '-frames:v', '1', f'output/{guid}/thumbnail.png']
+
+        subprocess.check_output(thumbnail_command)
+
+        upload_file(f'output/{guid}/thumbnail.png',
+                    S3_DESTINATION_BUCKET, f'{guid}/thumbnail.png')
+        data['frameCapture'] = f'{guid}/thumbnail.png'
 
         data['detail']['outputGroupDetails'].append(
             {
