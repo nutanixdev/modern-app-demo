@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 
 import environ
+from django.core.management.utils import get_random_secret_key
 
 env = environ.Env()
 
@@ -27,7 +28,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.str(
-    "SECRET_KEY", "django-insecure-t=4#jh7k0#=yc(k4$@=%$&xk!=axm)=j3_2ie_h()mm2caf%w*")
+    "SECRET_KEY", default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
@@ -67,7 +68,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -157,10 +158,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = "static"
+STATIC_ROOT = "staticfiles"
 STATICFILES_DIRS = [
-    BASE_DIR / "staticfiles",
+    BASE_DIR / "static",
 ]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -169,19 +171,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # VOD
 VOD_BACKEND_API = env.str(
-    "VOD_BACKEND_API")
+    "VOD_BACKEND_API", None)
 
 # Objects
 SIGNED_URL_EXPIRATION = 3600
 
-# AWS_S3_SIGNATURE_VERSION = env.str(
-#     "AWS_S3_SIGNATURE_VERSION", default="s3v4")
 AWS_S3_ENDPOINT_URL = env.str(
     "AWS_S3_ENDPOINT_URL", None)
 
 AWS_REGION = env.str("AWS_REGION", default="us-east-1")
-AWS_ACCESS_KEY_ID = env.str("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = env.str("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = env.str("AWS_ACCESS_KEY_ID", None)
+AWS_SECRET_ACCESS_KEY = env.str("AWS_SECRET_ACCESS_KEY", None)
 
 
 # Allauth

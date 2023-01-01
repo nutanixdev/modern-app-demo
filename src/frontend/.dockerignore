@@ -10,5 +10,5 @@ test_*
 *.env
 *.sqlite3
 __pycache__
-static
+staticfiles
 .func
