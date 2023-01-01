@@ -1,0 +1,14 @@
+Dockerfile
+Procfile
+README.md
+test_*
+*.pyc
+*.pyo
+*.pyd
+*.orig
+*.yaml
+*.env
+*.sqlite3
+__pycache__
+static
+.func
