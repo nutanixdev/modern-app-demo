@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 USER 1001
 
+RUN python manage.py collectstatics
+
 EXPOSE 8080
 
 # Set the default command for the resulting image
