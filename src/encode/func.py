@@ -133,13 +133,17 @@ def main(context: Context):
                 break
 
             # params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0'])
-            params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0?'])
-            params_stream_maps_args.append(f'v:{i},a:{i},name:{v["name"]}')
+            if data['srcMediainfo'].get('audio'):
+                params_maps_args.extend(['-map', '0:v:0', '-map', '0:a:0'])
+                params_stream_maps_args.append(f'v:{i},a:{i},name:{v["name"]}')
+            else:
+                params_maps_args.extend(['-map', '0:v:0'])
+                params_stream_maps_args.append(f'v:{i},name:{v["name"]}')
 
             scale_filter = [
                 f'-filter:v:{i}',
                 # f'scale=w={w}:h={h}:force_original_aspect_ratio=decrease',
-                f'scale={w}:-2',
+                f'scale=-2:{h}',
                 '-b:v',
                 v['bitrate'],
                 f'-maxrate:v:{i}',
