@@ -182,14 +182,16 @@ def main(context: Context):
         playlistFilePaths.sort(reverse=True)
 
         # Create thumbnail
+        thumbnail_s3_path = f'{guid}/thumbnail.jpg'
+        thumbnail_local_path = f'output/{guid}/thumbnail.jpg'
         thumbnail_command = ['ffmpeg', '-ss', '00:00:05', '-i',
-                             signed_url, '-frames:v', '1', f'output/{guid}/thumbnail.png']
+                             signed_url, '-qscale:v', '4', '-frames:v', '1', thumbnail_local_path]
 
         subprocess.check_output(thumbnail_command)
 
-        upload_file(f'output/{guid}/thumbnail.png',
-                    S3_DESTINATION_BUCKET, f'{guid}/thumbnail.png')
-        data['frameCapture'] = f'{guid}/thumbnail.png'
+        upload_file(thumbnail_local_path,
+                    S3_DESTINATION_BUCKET, thumbnail_s3_path)
+        data['frameCapture'] = thumbnail_s3_path
 
         data['encodingOutput']['outputGroupDetails'].append(
             {
