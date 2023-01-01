@@ -13,9 +13,9 @@ USER 0
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-USER 1001
-
 RUN python manage.py collectstatic
+
+USER 1001
 
 EXPOSE 8080
 
