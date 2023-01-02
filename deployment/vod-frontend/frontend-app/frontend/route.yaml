@@ -1,0 +1,32 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: frontend
+  namespace: vod-frontend
+  labels:
+    app: frontend
+    app.kubernetes.io/instance: frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/name: frontend
+    app.openshift.io/runtime: python
+    app.kubernetes.io/part-of: frontend-app
+    app.openshift.io/runtime-version: 3.9-ubi8
+  defaultAnnotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
+spec:
+  to:
+    kind: Service
+    name: frontend
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    caCertificate: ''
+    certificate: ''
+    destinationCACertificate: ''
+    key: ''
+  host: ''
+  path: ''
+  port:
+    targetPort: 8080-tcp
+  wildcardPolicy: None

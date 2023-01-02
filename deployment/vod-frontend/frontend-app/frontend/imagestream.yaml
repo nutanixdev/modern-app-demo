@@ -1,0 +1,14 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: frontend
+  namespace: vod-frontend
+  labels:
+    app: frontend
+    app.kubernetes.io/instance: frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: frontend-app
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ''
