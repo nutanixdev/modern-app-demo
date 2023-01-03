@@ -22,12 +22,13 @@ def index(request):
     data = response.json()
 
     for video in data:
-        if request.is_secure():
-            video['frameCapture'] = get_signed_url(
-                video['destBucket'], video['frameCapture'])
-        else:
-            video['frameCapture'] = get_signed_url(
-                video['destBucket'], video['frameCapture'], scheme='http')
+        if video.get('frameCapture'):
+            if request.is_secure():
+                video['frameCapture'] = get_signed_url(
+                    video['destBucket'], video['frameCapture'])
+            else:
+                video['frameCapture'] = get_signed_url(
+                    video['destBucket'], video['frameCapture'], scheme='http')
 
     context = {
         'videos': data,
