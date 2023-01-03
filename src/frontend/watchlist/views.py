@@ -22,9 +22,12 @@ def index(request):
     data = response.json()
 
     for video in data:
-        if video.get('frameCapture'):
+        if request.is_secure():
             video['frameCapture'] = get_signed_url(
                 video['destBucket'], video['frameCapture'])
+        else:
+            video['frameCapture'] = get_signed_url(
+                video['destBucket'], video['frameCapture'], scheme='http')
 
     context = {
         'videos': data,
@@ -39,13 +42,12 @@ def player(request, video_guid):
         fileobj = request.GET['hlsPlaylist']
     else:
         endpoint = '/'.join([URL, str(video_guid)])
-        try:
-            response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
-            response.raise_for_status()
+        response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
 
+        if response.ok:
             bucket = response.json()['destBucket']
             fileobj = response.json()['hlsPlaylist']
-        except:
+        else:
             return HttpResponseNotFound(response.content)
 
     context = {
@@ -61,16 +63,19 @@ def get_playlist(request, video_guid):
         bucket = request.GET['destBucket']
     else:
         endpoint = '/'.join([URL, str(video_guid)])
-        try:
-            response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
-            response.raise_for_status()
+        response = requests.get(endpoint, verify=SSL_VERIFY, timeout=5)
 
+        if response.ok:
             bucket = response.json()['destBucket']
-        except:
+        else:
             return HttpResponseNotFound(response.content)
 
     fileobj = request.path.strip('/').split('/', 1)[-1]
-    signed_url = get_signed_url(bucket, fileobj)
+
+    if request.is_secure():
+        signed_url = get_signed_url(bucket, fileobj)
+    else:
+        signed_url = get_signed_url(bucket, fileobj, 'http')
 
     playlist = m3u8.load(signed_url, verify_ssl=SSL_VERIFY)
 
@@ -80,7 +85,10 @@ def get_playlist(request, video_guid):
     else:
         for segment in playlist.segments:
             ts_fileobj = '/'.join([str(video_guid), segment.uri])
-            ts_signed_url = get_signed_url(bucket, ts_fileobj)
+            if request.is_secure():
+                ts_signed_url = get_signed_url(bucket, ts_fileobj)
+            else:
+                ts_signed_url = get_signed_url(bucket, ts_fileobj, 'http')
             segment.uri = ts_signed_url
 
     return StreamingHttpResponse(playlist.dumps())

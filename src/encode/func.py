@@ -191,7 +191,7 @@ def main(context: Context):
         thumbnail_s3_path = f'{guid}/thumbnail.jpg'
         thumbnail_local_path = f'output/{guid}/thumbnail.jpg'
         thumbnail_command = ['ffmpeg', '-ss', '00:00:05', '-i',
-                             signed_url, '-qscale:v', '4', '-frames:v', '1', thumbnail_local_path]
+                             signed_url, '-qscale:v', '6', '-frames:v', '1', thumbnail_local_path]
 
         subprocess.check_output(thumbnail_command)
 
