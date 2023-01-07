@@ -19,14 +19,13 @@ SSL_VERIFY = settings.SSL_VERIFY
 def index(request):
     response = requests.get(URL, verify=SSL_VERIFY, timeout=5)
 
-    print(request.META)
     print(request.headers)
 
     data = response.json()
 
     for video in data:
         if video.get('frameCapture'):
-            if request.is_secure():
+            if request.headers.get('X-Forwarded-Proto') == 'https':
                 video['frameCapture'] = get_signed_url(
                     video['destBucket'], video['frameCapture'])
             else:
@@ -76,7 +75,7 @@ def get_playlist(request, video_guid):
 
     fileobj = request.path.strip('/').split('/', 1)[-1]
 
-    if request.is_secure():
+    if request.headers.get('X-Forwarded-Proto') == 'https':
         signed_url = get_signed_url(bucket, fileobj)
     else:
         signed_url = get_signed_url(bucket, fileobj, 'http')
@@ -89,7 +88,7 @@ def get_playlist(request, video_guid):
     else:
         for segment in playlist.segments:
             ts_fileobj = '/'.join([str(video_guid), segment.uri])
-            if request.is_secure():
+            if request.headers.get('X-Forwarded-Proto') == 'https':
                 ts_signed_url = get_signed_url(bucket, ts_fileobj)
             else:
                 ts_signed_url = get_signed_url(bucket, ts_fileobj, 'http')
