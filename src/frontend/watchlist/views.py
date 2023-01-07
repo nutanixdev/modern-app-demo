@@ -19,8 +19,6 @@ SSL_VERIFY = settings.SSL_VERIFY
 def index(request):
     response = requests.get(URL, verify=SSL_VERIFY, timeout=5)
 
-    print(request.headers)
-
     data = response.json()
 
     for video in data:
