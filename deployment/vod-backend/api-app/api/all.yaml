@@ -13,119 +13,45 @@ metadata:
     app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
     app.openshift.io/vcs-ref: ''
 ---
-kind: Pipeline
-apiVersion: tekton.dev/v1beta1
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
 metadata:
   name: api
   namespace: vod-backend
   labels:
-    operator.tekton.dev/operand-name: openshift-pipelines-addons
-    pipeline.openshift.io/strategy: docker
-    pipeline.openshift.io/type: openshift
+    app: api
     app.kubernetes.io/instance: api
+    app.kubernetes.io/component: api
     app.kubernetes.io/name: api
+    app.openshift.io/runtime: python
+    app.kubernetes.io/part-of: api-app
+    app.openshift.io/runtime-version: 3.9-ubi8
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ""
 spec:
-  params:
-  - name: APP_NAME
-    type: string
-    default: api
-  - name: GIT_REPO
-    type: string
-    default: https://github.com/nutanixdev/modern-app-demo.git
-  - name: GIT_REVISION
-    type: string
-    default: ''
-  - name: IMAGE_NAME
-    type: string
-    default: image-registry.openshift-image-registry.svc:5000/vod-backend/api
-  - default: src/api
-    name: PATH_CONTEXT
-    type: string
-  tasks:
-  - name: fetch-repository
-    params:
-    - name: url
-      value: "$(params.GIT_REPO)"
-    - name: revision
-      value: "$(params.GIT_REVISION)"
-    - name: subdirectory
-      value: ''
-    - name: deleteExisting
-      value: 'true'
-    taskRef:
-      kind: ClusterTask
-      name: git-clone
-    workspaces:
-    - name: output
-      workspace: workspace
-  - name: build
-    params:
-    - name: IMAGE
-      value: "$(params.IMAGE_NAME)"
-    - name: TLSVERIFY
-      value: 'false'
-    - name: CONTEXT
-      value: "$(params.PATH_CONTEXT)"
-    runAfter:
-    - fetch-repository
-    taskRef:
-      kind: ClusterTask
-      name: buildah
-    workspaces:
-    - name: source
-      workspace: workspace
-  - name: deploy
-    params:
-    - name: SCRIPT
-      value: oc rollout status dc/$(params.APP_NAME)
-    runAfter:
-    - build
-    taskRef:
-      kind: ClusterTask
-      name: openshift-client
-  workspaces:
-  - name: workspace
----
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: api-initial
-  namespace: vod-backend
-  labels:
-    app.kubernetes.io/instance: api
-    app.kubernetes.io/name: api
-    operator.tekton.dev/operand-name: openshift-pipelines-addons
-    pipeline.openshift.io/strategy: docker
-    pipeline.openshift.io/type: openshift
-    tekton.dev/pipeline: api
-spec:
-  pipelineRef:
-    name: api
-  params:
-  - name: APP_NAME
-    value: api
-  - name: GIT_REPO
-    value: https://github.com/nutanixdev/modern-app-demo.git
-  - name: GIT_REVISION
-    value: ''
-  - name: IMAGE_NAME
-    value: image-registry.openshift-image-registry.svc:5000/vod-backend/api
-  - name: PATH_CONTEXT
-    value: src/api
-  resources: []
-  workspaces:
-  - name: workspace
-    volumeClaimTemplate:
-      metadata:
-        labels:
-          tekton.dev/pipeline: api
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
-  status:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: api:latest
+  source:
+    contextDir: src/api
+    git:
+      uri: https://github.com/nutanixdev/modern-app-demo.git
+      ref: ""
+      type: Git
+  strategy:
+    type: Source
+    sourceStrategy:
+      env: []
+      from:
+        kind: ImageStreamTag
+        name: python:3.9-ubi8
+        namespace: openshift
+  triggers:
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
 ---
 apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig

@@ -1,0 +1,39 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: api
+  namespace: vod-backend
+  labels:
+    app: api
+    app.kubernetes.io/instance: api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/name: api
+    app.openshift.io/runtime: python
+    app.kubernetes.io/part-of: api-app
+    app.openshift.io/runtime-version: 3.9-ubi8
+  annotations:
+    app.openshift.io/vcs-uri: https://github.com/nutanixdev/modern-app-demo.git
+    app.openshift.io/vcs-ref: ""
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: api:latest
+  source:
+    contextDir: src/api
+    git:
+      uri: https://github.com/nutanixdev/modern-app-demo.git
+      ref: ""
+      type: Git
+  strategy:
+    type: Source
+    sourceStrategy:
+      env: []
+      from:
+        kind: ImageStreamTag
+        name: python:3.9-ubi8
+        namespace: openshift
+  triggers:
+    - type: ImageChange
+      imageChange: {}
+    - type: ConfigChange
