@@ -20,7 +20,7 @@ spec:
     name: frontend
   tls:
     termination: edge
-    insecureEdgeTerminationPolicy: Redirect
+    insecureEdgeTerminationPolicy: Allow
     caCertificate: ''
     certificate: ''
     destinationCACertificate: ''

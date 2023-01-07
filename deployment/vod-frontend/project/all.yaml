@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vod-postgres
+  namespace: vod-frontend
+stringData:
+  DATABASE_USER: postgres
+  DATABASE_PASSWORD: postgres
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vod-objects
+  namespace: vod-frontend
+stringData:
+  AWS_ACCESS_KEY_ID: <YOUR_ADMINUSER_ACCESS_KEY>
+  AWS_SECRET_ACCESS_KEY: <YOUR_ADMINUSER_SECRET_KEY>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vod-config
+  namespace: vod-frontend
+data:
+  SSL_VERIFY: 'False'
+  DATABASE_ENGINE: django.db.backends.postgresql
+  DATABASE_NAME: vod
+  DATABASE_HOST: ndb-postgres-svc
+  DATABASE_PORT: '80'
+  AWS_S3_ENDPOINT_URL: 'https://edge-objects.ntnxlab.local/'
+  VOD_BACKEND_API: 'http://api.vod-backend.svc.cluster.local:8080/'
+  ALLOWED_HOSTS: '.ntnxlab.local'
+  CSRF_TRUSTED_ORIGINS: 'https://*.ntnxlab.local'
