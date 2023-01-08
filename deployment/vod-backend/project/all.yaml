@@ -32,7 +32,7 @@ data:
   MONGODB_DATABASE: vod
   AWS_REGION: us-east-1
   AWS_S3_ENDPOINT_URL: https://primary-objects.ntnxlab.local
-  S3_SOURCE_BUCKET: <YOUR_VIDEO_INPUT_BUCKET_NAME>
-  S3_DESTINATION_BUCKET: <YOUR_VIDEO_OUTPUT_BUCKET_NAME>
+  S3_SOURCE_BUCKET: user<CLUSTER_INDEX>-video-input
+  S3_DESTINATION_BUCKET: user<CLUSTER_INDEX>-video-output
   S3_CDN_URL: https://edge-objects.ntnxlab.local
   SSL_VERIFY: 'False'
