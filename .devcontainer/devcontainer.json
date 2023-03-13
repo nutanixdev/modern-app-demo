@@ -7,7 +7,7 @@
     "features": {
         "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
         // "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
-        "ghcr.io/devcontainers/features/docker-in-docker:1": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
     "extensions": [
         "richie5um2.vscode-statusbar-json-path"
