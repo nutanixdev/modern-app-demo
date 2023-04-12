@@ -136,3 +136,6 @@ dmypy.json
 
 # Others
 *.disabled
+openssl/
+csi/
+staging/
