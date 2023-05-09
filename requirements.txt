@@ -4,7 +4,7 @@ pymongo==4.3.3
 fastapi==0.88.0
 motor==3.1.1
 uvicorn==0.20.0
-Django==4.0.10
+Django==4.1.9
 psycopg2==2.9.5
 django-environ==0.10.0
 requests==2.28.1
