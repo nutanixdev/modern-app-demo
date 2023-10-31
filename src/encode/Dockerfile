@@ -13,6 +13,8 @@ USER 0
 
 ADD https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz /tmp
 
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends python3-pip xz-utils \
     && apt-get autoremove -y && apt-get clean -y \
