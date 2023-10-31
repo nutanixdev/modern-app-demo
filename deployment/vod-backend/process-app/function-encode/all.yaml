@@ -119,8 +119,9 @@ spec:
         labels:
           tekton.dev/pipeline: encode
       spec:
+        storageClassName: nutanix-files
         accessModes:
-        - ReadWriteOnce
+        - ReadWriteMany
         resources:
           requests:
             storage: 1Gi
